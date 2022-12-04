@@ -6,7 +6,7 @@ for (a, b), (c, d) in (map(lambda s: map(int, s.split('-')), line.split(','))
                        for line in DATA.splitlines()):
     if a >= c:
         a, b, c, d = c, d, a, b
-    result += b >= d or (c == a and d >= b)
+    result += b >= d or c == a
     result2 += b >= c
 
 print(result)
