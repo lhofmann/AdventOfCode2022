@@ -2,30 +2,27 @@ import re
 
 DATA = open('day5.txt').read()
 
-def run(pick_multiple = False):
+
+def run(pick_multiple=False):
     stacks = []
+    STACK_EXPR = r'(   |\[(\w)\]) ?'
 
     for line in DATA.splitlines():
-        if not line:
+        if not re.match(f'^({STACK_EXPR})+$', line):
             break
-        if '[' not in line:
-            continue
-        for i in range(1, len(line), 4):
-            c = line[i]
-            if not c.isalpha():
-                continue
-            stack = (i - 1) // 4
-            while len(stacks) < stack + 1:
-                stacks.append([])
-            stacks[stack].insert(0, c)
+        groups = re.findall(STACK_EXPR, line)
+        while len(stacks) < len(groups):
+            stacks.append([])
+        for stack, (_, c) in zip(stacks, groups):
+            if c:
+                stack.insert(0, c)
 
-    for line in DATA.splitlines():    
-        groups = re.match(r'^move (\d+) from (\d+) to (\d+)$', line)
-        if not groups:
+    for line in DATA.splitlines():
+        m = re.match(r'^move (\d+) from (\d+) to (\d+)$', line)
+        if not m:
             continue
-        n = int(groups.group(1))
-        source = int(groups.group(2)) - 1
-        dest = int(groups.group(3)) - 1
+        n, source, dest = map(int, m.groups())
+        source, dest = source - 1, dest - 1
         if pick_multiple:
             stacks[dest] += stacks[source][-n:]
             stacks[source] = stacks[source][:-n]
@@ -35,6 +32,7 @@ def run(pick_multiple = False):
 
     result = ''.join(s[-1] for s in stacks)
     return result
+
 
 result = run()
 print(result)
