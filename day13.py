@@ -1,7 +1,7 @@
 from functools import cmp_to_key
 
 DATA = open('day13.txt').read()
-DIVIDER = [[[2]], [[6]]]
+DIVIDERS = [[[2]], [[6]]]
 
 
 def cmp_int(a, b):
@@ -30,9 +30,22 @@ result = sum(i + 1
 print(result)
 assert result == 5529
 
-packets = [eval(line) for line in DATA.splitlines() if line] + DIVIDER
-packets.sort(key=cmp_to_key(cmp))
-result = (packets.index(DIVIDER[0]) + 1) * (packets.index(DIVIDER[1]) + 1)
+
+def quickselect(packets, divider):
+    pivot = packets[-1]
+    left = [packet for packet in packets if cmp(packet, pivot) < 0]
+    c = cmp(divider, pivot)
+    if c == 0:
+        return len(left)
+    elif c < 0:
+        return quickselect(left, divider)
+    right = [packet for packet in packets if cmp(packet, pivot) > 0]
+    return len(left) + quickselect(right, divider)
+
+
+packets = [eval(line) for line in DATA.splitlines() if line] + DIVIDERS
+result = (quickselect(packets, DIVIDERS[0]) + 1) * \
+         (quickselect(packets, DIVIDERS[1]) + 1)
 
 print(result)
 assert result == 27690
