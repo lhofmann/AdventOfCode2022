@@ -31,21 +31,13 @@ print(result)
 assert result == 5529
 
 
-def quickselect(packets, divider):
-    pivot = packets[-1]
-    left = [packet for packet in packets if cmp(packet, pivot) < 0]
-    c = cmp(divider, pivot)
-    if c == 0:
-        return len(left)
-    elif c < 0:
-        return quickselect(left, divider)
-    right = [packet for packet in packets if cmp(packet, pivot) > 0]
-    return len(left) + quickselect(right, divider)
+def select(packets, divider):
+    return sum(1 for packet in packets if cmp(packet, divider) < 0)
 
 
 packets = [eval(line) for line in DATA.splitlines() if line] + DIVIDERS
-result = (quickselect(packets, DIVIDERS[0]) + 1) * \
-         (quickselect(packets, DIVIDERS[1]) + 1)
+result = (select(packets, DIVIDERS[0]) + 1) * \
+         (select(packets, DIVIDERS[1]) + 1)
 
 print(result)
 assert result == 27690
