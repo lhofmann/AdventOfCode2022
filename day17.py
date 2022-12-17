@@ -1,31 +1,26 @@
 from itertools import cycle
 
 DATA = open('day17.txt').read().strip()
-SHAPES = (
-    [
-        '####'
-    ],
-    [
-        '.#.',
-        '###',
-        '.#.',
-    ],
-    [
-        '..#',
-        '..#',
-        '###',
-    ],
-    [
-        '#',
-        '#',
-        '#',
-        '#',
-    ],
-    [
-        '##',
-        '##',
-    ],
-)
+SHAPES = '''
+####
+
+.#.
+###
+.#.
+
+..#
+..#
+###
+
+#
+#
+#
+#
+
+##
+##
+'''
+SHAPES = tuple(map(str.splitlines, SHAPES.strip().split('\n\n')))
 COLUMNS = 7
 
 
@@ -50,16 +45,16 @@ def place(grid, shape, x, y):
     return result
 
 
-def run(steps=2022):
+def run(blocks=2022):
     grid = [[False] * COLUMNS for _ in range(1000)]
     height = 0
     y_offset = 0
     i = 0
     j = 0
-    step = 0
+    block = 0
     cache = {}
 
-    while step < steps:
+    while block < blocks:
         x = 2
         y = height + 3 - y_offset
         shape = SHAPES[j]
@@ -88,18 +83,18 @@ def run(steps=2022):
         cache_key = (i, j,
                      tuple(tuple(row) for row in grid[:height - y_offset]))
         if cache_key in cache:
-            prev_height, prev_step = cache[cache_key]
+            prev_height, prev_block = cache[cache_key]
             dh = height - prev_height
-            ds = step - prev_step
-            skip = (steps - step) // ds
+            ds = block - prev_block
+            skip = (blocks - block) // ds
 
             height += skip * dh
             y_offset += skip * dh
-            step += skip * ds
+            block += skip * ds
         else:
-            cache[cache_key] = (height, step)
+            cache[cache_key] = (height, block)
 
-        step += 1
+        block += 1
     return height
 
 
