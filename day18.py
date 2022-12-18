@@ -17,7 +17,7 @@ min_x, max_x = min(x for x, _, _ in cubes) - 1, max(x for x, _, _ in cubes) + 1
 min_y, max_y = min(y for _, y, _ in cubes) - 1, max(y for _, y, _ in cubes) + 1
 min_z, max_z = min(z for _, _, z in cubes) - 1, max(z for _, _, z in cubes) + 1
 
-S = [(min_x - 1, min_y - 1, min_z - 1)]
+S = [(min_x, min_y, min_z)]
 visited = set()
 result = 0
 while S:
@@ -27,8 +27,8 @@ while S:
     visited.add((x, y, z))
     for nx, ny, nz in ((x + 1, y, z), (x - 1, y, z), (x, y + 1, z),
                        (x, y - 1, z), (x, y, z + 1), (x, y, z - 1)):
-        if nx < min_x - 1 or ny < min_y - 1 or nz < min_z - 1 or \
-           nx > max_x + 1 or ny > max_y + 1 or nz > max_z + 1:
+        if nx < min_x or ny < min_y or nz < min_z or \
+           nx > max_x or ny > max_y or nz > max_z:
             continue
         if (nx, ny, nz) in cubes:
             result += 1
