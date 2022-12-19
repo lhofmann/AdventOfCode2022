@@ -1,3 +1,4 @@
+from collections import defaultdict
 from itertools import chain, combinations
 import re
 
@@ -13,6 +14,20 @@ for line in DATA.splitlines():
     flow[node] = int(m.group(2))
     neighbors[node] = m.group(3).split(', ')
 
+weighted_neighbors = defaultdict(list)
+for initial in nodes:
+    S = [(initial, 0)]
+    visited = set()
+    while S:
+        node, weight = S.pop(0)
+        if node in visited:
+            continue
+        visited.add(node)
+        if node != initial:
+            weighted_neighbors[initial].append((node, weight))
+        for neighbor in neighbors[node]:
+            S.append((neighbor, weight + 1))
+
 cache = {}
 
 
@@ -23,13 +38,14 @@ def max_pressure(node, time, opened):
     if cache_key in cache:
         return cache[cache_key]
     result = 0
-    if flow[node] != 0 and node not in opened:
+    for neighbor, cost in weighted_neighbors[node]:
+        if neighbor in opened or flow[neighbor] == 0 or cost + 1 > time:
+            continue
         opened_new = opened.copy()
-        opened_new.add(node)
-        result = (time - 1) * flow[node] + \
-                 max_pressure(node, time - 1, opened_new)
-    for neighbor in neighbors[node]:
-        result = max(result, max_pressure(neighbor, time - 1, opened))
+        opened_new.add(neighbor)
+        result_new = (time - cost - 1) * flow[neighbor] + \
+                     max_pressure(neighbor, time - cost - 1, opened_new)
+        result = max(result, result_new)
     cache[cache_key] = result
     return result
 
