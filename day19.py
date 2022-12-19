@@ -5,15 +5,15 @@ DATA = open('day19.txt').read()
 
 
 def push(S, t, ore, clay, obsidian, geode, ore_robots,
-         clay_robots, obsidian_robots, geode_robots):
+         clay_robots, obsidian_robots, geode_robots, limits):
     heuristic = t * geode_robots + t * (t - 1) // 2
     heappush(
         S,
         (-(geode + heuristic),
          t,
-         ore,
-         clay,
-         obsidian,
+         min(limits[0], ore),
+         min(limits[1], clay),
+         min(limits[2], obsidian),
          geode,
          ore_robots,
          clay_robots,
@@ -23,8 +23,10 @@ def push(S, t, ore, clay, obsidian, geode, ore_robots,
 
 def max_geodes(time, ore_ore, clay_ore, obsidian_ore,
                obsidian_clay, geode_ore, geode_obsidian):
+    max_ore = max(ore_ore, clay_ore, obsidian_ore, geode_ore)
+    limits = (2 * max_ore, 2 * obsidian_clay, 2 * geode_obsidian)
     S = []
-    push(S, time, 0, 0, 0, 0, 1, 0, 0, 0)
+    push(S, time, 0, 0, 0, 0, 1, 0, 0, 0, limits)
     visited = set()
     while S:
         state = heappop(S)
@@ -44,9 +46,10 @@ def max_geodes(time, ore_ore, clay_ore, obsidian_ore,
                  ore_robots,
                  clay_robots,
                  obsidian_robots,
-                 geode_robots + 1)
+                 geode_robots + 1,
+                 limits)
             continue
-        if ore >= ore_ore and ore_robots < max(ore_ore, clay_ore, geode_ore):
+        if ore >= ore_ore and ore_robots < max_ore:
             push(S,
                  t - 1,
                  ore + ore_robots - ore_ore,
@@ -56,7 +59,8 @@ def max_geodes(time, ore_ore, clay_ore, obsidian_ore,
                  ore_robots + 1,
                  clay_robots,
                  obsidian_robots,
-                 geode_robots)
+                 geode_robots,
+                 limits)
         if ore >= clay_ore and clay_robots < obsidian_clay:
             push(S,
                  t - 1,
@@ -67,7 +71,8 @@ def max_geodes(time, ore_ore, clay_ore, obsidian_ore,
                  ore_robots,
                  clay_robots + 1,
                  obsidian_robots,
-                 geode_robots)
+                 geode_robots,
+                 limits)
         if ore >= obsidian_ore and clay >= obsidian_clay and obsidian_robots < geode_obsidian:
             push(S,
                  t - 1,
@@ -78,7 +83,8 @@ def max_geodes(time, ore_ore, clay_ore, obsidian_ore,
                  ore_robots,
                  clay_robots,
                  obsidian_robots + 1,
-                 geode_robots)
+                 geode_robots,
+                 limits)
         push(S,
              t - 1,
              ore + ore_robots,
@@ -88,7 +94,8 @@ def max_geodes(time, ore_ore, clay_ore, obsidian_ore,
              ore_robots,
              clay_robots,
              obsidian_robots,
-             geode_robots)
+             geode_robots,
+             limits)
 
 
 result = 0
