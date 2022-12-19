@@ -1,22 +1,17 @@
-from dataclasses import dataclass
+from itertools import chain, combinations
 import re
 
 DATA = open('day16.txt').read()
 
-
-@dataclass
-class Node:
-    flow: int
-    neighbors: list
-
-
-nodes = {}
+nodes, flow, neighbors = [], {}, {}
 for line in DATA.splitlines():
     m = re.match(
         r'Valve (\w+) has flow rate=(\d+); tunnels? leads? to valves? (.*)',
         line)
-    nodes[m.group(1)] = Node(int(m.group(2)), m.group(3).split(', '))
-
+    node = m.group(1)
+    nodes.append(node)
+    flow[node] = int(m.group(2))
+    neighbors[node] = m.group(3).split(', ')
 
 cache = {}
 
@@ -28,12 +23,12 @@ def max_pressure(node, time, opened):
     if cache_key in cache:
         return cache[cache_key]
     result = 0
-    if nodes[node].flow != 0 and node not in opened:
+    if flow[node] != 0 and node not in opened:
         opened_new = opened.copy()
         opened_new.add(node)
-        result = (time - 1) * nodes[node].flow + \
-            max_pressure(node, time - 1, opened_new)
-    for neighbor in nodes[node].neighbors:
+        result = (time - 1) * flow[node] + \
+                 max_pressure(node, time - 1, opened_new)
+    for neighbor in neighbors[node]:
         result = max(result, max_pressure(neighbor, time - 1, opened))
     cache[cache_key] = result
     return result
@@ -44,46 +39,21 @@ print(result)
 assert result == 1617
 
 
-cache = {}
-
-
-def max_pressure2(node1, node2, time, opened):
-    if time <= 0 or len(opened) == len(nodes):
-        return 0
-    cache_key = (node1, node2, time, tuple(sorted(opened)))
-    cache_key_sym = (node2, node1, time, tuple(sorted(opened)))
-    if cache_key in cache:
-        return cache[cache_key]
-    if cache_key_sym in cache:
-        return cache[cache_key_sym]
-
+def part2(time):
     result = 0
-
-    for neighbor1 in [node1] + nodes[node1].neighbors:
-        if neighbor1 == node1 and (nodes[node1].flow == 0 or node1 in opened):
+    keys = [node for node in nodes if flow[node] > 0]
+    for mask in chain.from_iterable(combinations(keys, r)
+                                    for r in range(1, len(keys))):
+        mask = set(mask)
+        inverted_mask = set(k for k in keys if k not in mask)
+        if len(mask) > len(inverted_mask):
             continue
-
-        for neighbor2 in [node2] + nodes[node2].neighbors:
-            result_inner = 0
-            opened_new = opened.copy()
-            if neighbor1 == node1:
-                opened_new.add(node1)
-                result_inner += (time - 1) * nodes[node1].flow
-
-            if neighbor2 == node2:
-                if nodes[node2].flow == 0 or node2 in opened_new:
-                    continue
-                opened_new.add(node2)
-                result_inner += (time - 1) * nodes[node2].flow
-
-            result_inner += max_pressure2(neighbor1,
-                                          neighbor2, time - 1, opened_new)
-            result = max(result, result_inner)
-
-    cache[cache_key] = cache[cache_key_sym] = result
+        pressure = max_pressure('AA', time, mask) + \
+                   max_pressure('AA', time, inverted_mask)
+        result = max(result, pressure)
     return result
 
 
-result = max_pressure2('AA', 'AA', 26, set())
+result = part2(26)
 print(result)
 assert result == 2171
