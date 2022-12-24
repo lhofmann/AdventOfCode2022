@@ -18,14 +18,8 @@ def next_state(state):
         for direction in directions:
             ni = bi + {'^': -1, 'v': 1, '<': 0, '>': 0}[direction]
             nj = bj + {'^': 0, 'v': 0, '<': -1, '>': 1}[direction]
-            if ni == 0:
-                ni = rows - 2
-            elif ni == rows - 1:
-                ni = 1
-            if nj == 0:
-                nj = cols - 2
-            elif nj == cols - 1:
-                nj = 1
+            ni = 1 + (ni - 1) % (rows - 2)
+            nj = 1 + (nj - 1) % (cols - 2)
             blizzards[(ni, nj)].append(direction)
     return blizzards
 
